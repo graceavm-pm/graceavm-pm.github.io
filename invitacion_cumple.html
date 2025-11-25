@@ -1,524 +1,536 @@
-import React, { useState } from 'react';
-import { Calendar, MapPin, Clock, Users, Check, Gift, Heart, Music, AlertTriangle, Shirt, Cloud, Sparkles, Smile } from 'lucide-react';
-
-// --- ICONOS PERSONALIZADOS SVG ---
-
-const MushroomIcon = ({ className }) => (
-  <svg viewBox="0 0 100 100" className={className}>
-    {/* Tallo */}
-    <path d="M35 60 L 35 90 Q 35 95 40 95 L 60 95 Q 65 95 65 90 L 65 60 Z" fill="#FFFFFF" stroke="#e2e8f0" strokeWidth="2" />
-    {/* Sombrero */}
-    <path d="M10 60 Q 10 20 50 20 Q 90 20 90 60 Z" fill="#ef4444" />
-    {/* Lunares */}
-    <circle cx="30" cy="40" r="5" fill="white" opacity="0.9" />
-    <circle cx="70" cy="35" r="7" fill="white" opacity="0.9" />
-    <circle cx="50" cy="50" r="4" fill="white" opacity="0.9" />
-  </svg>
-);
-
-const ClassicSmurfIcon = ({ className }) => (
-  <svg viewBox="0 0 100 100" className={className} filter="drop-shadow(0px 2px 2px rgba(0,0,0,0.1))">
-    {/* White Hat */}
-    <path d="M20 45 Q 20 10 50 10 Q 80 10 80 45 L 90 55 Q 95 65 85 70 L 15 70 Q 5 65 10 55 Z" fill="#ffffff" />
-    {/* Blue Face */}
-    <circle cx="50" cy="65" r="25" fill="#3b82f6" />
-    {/* Nose */}
-    <ellipse cx="50" cy="65" rx="6" ry="4" fill="#60a5fa" />
-    {/* Smile */}
-    <path d="M40 75 Q 50 82 60 75" stroke="#1e3a8a" strokeWidth="3" fill="none" strokeLinecap="round" />
-  </svg>
-);
-
-const PapaSmurfIcon = ({ className }) => (
-  <svg viewBox="0 0 100 100" className={className} filter="drop-shadow(0px 2px 2px rgba(0,0,0,0.1))">
-    {/* Red Hat */}
-    <path d="M20 45 Q 20 10 50 10 Q 80 10 80 45 L 90 55 Q 95 65 85 70 L 15 70 Q 5 65 10 55 Z" fill="#dc2626" />
-    {/* Blue Face */}
-    <circle cx="50" cy="65" r="25" fill="#3b82f6" />
-    {/* White Beard */}
-    <path d="M28 75 Q 50 105 72 75 L 78 65 Q 90 85 75 95 Q 50 105 25 95 Q 10 85 22 65 Z" fill="white" />
-    {/* Nose */}
-    <ellipse cx="50" cy="65" rx="6" ry="4" fill="#60a5fa" />
-  </svg>
-);
-
-const SmurfetteIcon = ({ className }) => (
-  <svg viewBox="0 0 100 100" className={className} filter="drop-shadow(0px 2px 2px rgba(0,0,0,0.1))">
-    {/* Yellow Hair */}
-    <path d="M15 55 Q 10 30 30 20 Q 50 5 70 20 Q 90 30 85 55 L 95 75 Q 100 90 80 95 L 20 95 Q 0 90 5 75 Z" fill="#facc15" />
-     {/* White Hat */}
-    <path d="M30 35 Q 30 10 50 10 Q 70 10 70 35 L 82 45 Q 88 50 78 55 L 22 55 Q 12 50 18 45 Z" fill="white" />
-    {/* Blue Face */}
-    <circle cx="50" cy="65" r="22" fill="#3b82f6" />
-    {/* Nose */}
-    <ellipse cx="50" cy="65" rx="5" ry="3" fill="#60a5fa" />
-    {/* Eyelashes */}
-    <path d="M34 58 Q 38 52 42 58" stroke="#1e40af" strokeWidth="2" fill="none" strokeLinecap="round" />
-    <path d="M58 58 Q 62 52 66 58" stroke="#1e40af" strokeWidth="2" fill="none" strokeLinecap="round" />
-  </svg>
-);
-
-// --- COMPONENTE PRINCIPAL ---
-
-const App = () => {
-  const [formData, setFormData] = useState({
-    nombre: '',
-    asistencia: 'si',
-    acompanantes: 0,
-    listaAcompanantes: [], 
-    mensaje: '',
-    // SEGURIDAD: Campo Honeypot (trampa para bots)
-    _gotcha: '' 
-  });
-
-  const [submitted, setSubmitted] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [error, setError] = useState(null);
-
-  // Manejador general
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
-  };
-
-  // Manejador específico para el cambio de número de acompañantes
-  const handleAcompanantesCountChange = (e) => {
-    const count = parseInt(e.target.value);
-    const currentList = formData.listaAcompanantes;
-    // Rellenar array preservando nombres existentes si se aumenta la cantidad
-    const newList = Array(count).fill('').map((_, i) => currentList[i] || '');
-
-    setFormData(prev => ({
-      ...prev,
-      acompanantes: count,
-      listaAcompanantes: newList
-    }));
-  };
-
-  const handleCompanionNameChange = (index, value) => {
-    const newList = [...formData.listaAcompanantes];
-    newList[index] = value;
-    setFormData(prev => ({
-      ...prev,
-      listaAcompanantes: newList
-    }));
-  };
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>¡Fiesta en la Aldea Pitufa!</title>
+    <!-- Tailwind CSS para el diseño -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Iconos Lucide -->
+    <script src="https://unpkg.com/lucide@latest"></script>
     
-    // SEGURIDAD: Verificación Honeypot
-    if (formData._gotcha) {
-        console.log("Bot detectado 🤖. Bloqueando envío.");
-        setSubmitted(true);
-        return;
-    }
-
-    setIsSubmitting(true);
-    setError(null);
-
-    // ESTRUCTURA DE DATOS PARA GOOGLE SHEETS
-    const dataToSubmit = {
-      nombrePrincipal: formData.nombre,
-      asistencia: formData.asistencia, 
-      // Enviamos el array completo para que el script cree una fila por persona
-      listaAcompanantes: formData.asistencia === 'si' ? formData.listaAcompanantes : []
-    };
-
-    // ---------------------------------------------------------
-    // URL DEL SCRIPT DE GOOGLE APPS SCRIPT
-    // ---------------------------------------------------------
-    const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyfqBf1kBPDdt6Z7OjKeYZLOz5EhxpIlLtDAGTuJRzB2st8rZR9FyVkN5oHYKnMjynEvA/exec"; 
-
-    fetch(GOOGLE_SCRIPT_URL, {
-      method: "POST",
-      mode: "no-cors",
-      headers: { "Content-Type": "text/plain" },
-      body: JSON.stringify(dataToSubmit)
-    }).then(() => {
-       setSubmitted(true);
-       setIsSubmitting(false);
-    }).catch(err => {
-       console.error("Error:", err);
-       setError("Hubo un problema al enviar. Por favor intenta de nuevo.");
-       setIsSubmitting(false);
-    });
-  };
-
-  return (
-    <div className="min-h-screen bg-[#cbf3f9] font-sans text-slate-800 selection:bg-blue-200 overflow-x-hidden">
-      
-      {/* Decorative Background Elements */}
-      <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden">
-        <Cloud className="absolute top-20 left-10 text-white/40 w-24 h-24 animate-pulse" />
-        <Cloud className="absolute top-40 right-20 text-white/30 w-32 h-32 animate-pulse delay-700" />
-        <Cloud className="absolute bottom-20 left-1/4 text-white/20 w-40 h-40" />
-      </div>
-
-      {/* Hero Section */}
-      <header className="relative bg-gradient-to-b from-blue-600 to-sky-400 text-white pt-20 pb-48 px-4 text-center shadow-xl overflow-visible z-10">
+    <style>
+        /* Animaciones personalizadas que Tailwind no incluye por defecto */
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(-12deg); }
+            50% { transform: translateY(-10px) rotate(-12deg); }
+        }
+        @keyframes float-right {
+            0%, 100% { transform: translateY(0px) rotate(6deg); }
+            50% { transform: translateY(-10px) rotate(6deg); }
+        }
+        .animate-float { animation: float 4s ease-in-out infinite; }
+        .animate-float-right { animation: float-right 5s ease-in-out infinite; }
         
-        <div className="relative z-10 max-w-5xl mx-auto">
-          <div className="inline-block bg-white/90 text-blue-700 px-6 py-2 rounded-full text-sm font-extrabold tracking-widest mb-6 shadow-lg transform -rotate-2 border-2 border-blue-200">
-            ★ CUMPLEAÑOS DOBLE ★
-          </div>
-          
-          <h1 className="text-5xl md:text-7xl font-extrabold mb-8 tracking-tight drop-shadow-[0_4px_4px_rgba(0,0,0,0.25)] text-white">
-            ¡Fiesta en la<br/>
-            <span className="text-yellow-300 drop-shadow-md">Aldea Pitufa!</span>
-          </h1>
-          
-          {/* Padre e Hija Section */}
-          <div className="flex flex-col md:flex-row justify-center items-center gap-8 mt-12 mb-16 relative">
-            
-            {/* Lenin's Card */}
-            <div className="bg-red-600/90 p-8 rounded-[2rem] border-4 border-red-400 shadow-2xl transform hover:scale-105 transition-transform relative z-10 w-full max-w-xs group">
-              <div className="absolute -top-12 left-1/2 transform -translate-x-1/2 group-hover:-translate-y-2 transition-transform">
-                <PapaSmurfIcon className="w-32 h-32 drop-shadow-2xl" />
-              </div>
-              <div className="mt-16 text-center">
-                <h2 className="text-4xl font-black text-white mb-2 uppercase drop-shadow-md">Lenin</h2>
-                <div className="bg-white text-red-600 font-bold text-xs tracking-wider px-4 py-1 rounded-full inline-block mb-3 border-2 border-red-200 shadow-sm">PAPÁ PITUFO</div>
-                <p className="text-5xl font-extrabold text-yellow-300 drop-shadow-sm stroke-black">59</p>
-                <p className="text-white font-medium text-sm opacity-90">AÑOS</p>
-              </div>
-            </div>
+        /* Utilidades extra */
+        .bg-mushroom-pattern {
+            background-image: radial-gradient(#ffffff 15%, transparent 16%), radial-gradient(#ffffff 15%, transparent 16%); 
+            background-size: 10px 10px;
+            background-position: 0 0, 5px 5px;
+        }
+    </style>
+</head>
+<body class="bg-[#cbf3f9] font-sans text-slate-800 selection:bg-blue-200 overflow-x-hidden min-h-screen flex flex-col">
 
-            {/* Connector */}
-            <div className="flex flex-col items-center justify-center z-0 md:-mx-6 md:-mt-10 relative">
-              <Heart className="text-red-500 w-16 h-16 fill-current animate-pulse drop-shadow-lg" />
-              <span className="font-black text-white bg-blue-700 px-6 py-2 rounded-full text-sm mt-2 border-4 border-blue-400 shadow-xl whitespace-nowrap transform -rotate-3">PADRE E HIJA</span>
-            </div>
-
-            {/* Grace's Card */}
-            <div className="bg-yellow-400/90 p-8 rounded-[2rem] border-4 border-yellow-200 shadow-2xl transform hover:scale-105 transition-transform relative z-10 w-full max-w-xs group">
-              <div className="absolute -top-12 left-1/2 transform -translate-x-1/2 group-hover:-translate-y-2 transition-transform">
-                <SmurfetteIcon className="w-32 h-32 drop-shadow-2xl" />
-              </div>
-              <div className="mt-16 text-center">
-                <h2 className="text-4xl font-black text-blue-900 mb-2 uppercase drop-shadow-sm">Grace</h2>
-                <div className="bg-white text-blue-600 font-bold text-xs tracking-wider px-4 py-1 rounded-full inline-block mb-3 border-2 border-blue-200 shadow-sm">PITUFINA</div>
-                <p className="text-5xl font-extrabold text-white drop-shadow-[0_2px_0_rgba(0,0,0,0.2)]">30</p>
-                <p className="text-blue-900 font-medium text-sm opacity-80">AÑOS</p>
-              </div>
-            </div>
-
-          </div>
-          
-          <div className="flex flex-col md:flex-row justify-center gap-4 text-sm md:text-base font-bold relative z-20">
-             <div className="bg-white/95 text-blue-700 px-8 py-4 rounded-2xl shadow-[0_8px_0_rgba(29,78,216,0.2)] transform hover:-translate-y-1 transition-all flex items-center justify-center gap-3 border-2 border-blue-100">
-               <Calendar size={24} className="text-red-500" /> 
-               <span className="text-lg">27 de Diciembre</span>
-             </div>
-             <div className="bg-white/95 text-blue-700 px-8 py-4 rounded-2xl shadow-[0_8px_0_rgba(29,78,216,0.2)] transform hover:-translate-y-1 transition-all flex items-center justify-center gap-3 border-2 border-blue-100">
-               <Clock size={24} className="text-red-500" /> 
-               <span className="text-lg">11:00 AM</span>
-             </div>
-          </div>
-        </div>
-
-        {/* CORRECCIÓN: Grass Divider mejorado */}
-        <div className="absolute bottom-0 left-0 w-full z-10 pointer-events-none">
-          <svg className="w-full h-auto max-h-[100px] text-[#4ade80]" viewBox="0 0 1440 320" fill="currentColor" preserveAspectRatio="none">
-             <path fillOpacity="1" d="M0,96L48,112C96,128,192,160,288,160C384,160,480,128,576,112C672,96,768,96,864,112C960,128,1056,160,1152,160C1248,160,1344,128,1392,112L1440,96L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path>
-          </svg>
-        </div>
-
-        {/* Floating Mushrooms on Hero */}
-        <MushroomIcon className="absolute bottom-12 left-4 w-24 h-24 md:w-40 md:h-40 transform -rotate-12 drop-shadow-xl z-20" />
-        <MushroomIcon className="absolute bottom-8 right-6 w-20 h-20 md:w-32 md:h-32 transform rotate-6 drop-shadow-xl z-20" />
-      </header>
-
-      <main className="max-w-4xl mx-auto relative z-20 px-4 pb-20 space-y-12 mt-12">
-        
-        {/* Intro Card - Wooden Style */}
-        <div className="relative bg-[#fdfbf7] rounded-xl p-8 shadow-2xl border-4 border-[#8B4513] text-center transform rotate-1 mx-4 md:mx-0">
-          {/* Nail effects */}
-          <div className="absolute top-4 left-4 w-3 h-3 rounded-full bg-[#5d2e0c] shadow-inner"></div>
-          <div className="absolute top-4 right-4 w-3 h-3 rounded-full bg-[#5d2e0c] shadow-inner"></div>
-          <div className="absolute bottom-4 left-4 w-3 h-3 rounded-full bg-[#5d2e0c] shadow-inner"></div>
-          <div className="absolute bottom-4 right-4 w-3 h-3 rounded-full bg-[#5d2e0c] shadow-inner"></div>
-
-          <div className="flex justify-center mb-4">
-            <div className="bg-red-100 p-4 rounded-full border-2 border-red-200">
-              <Heart className="text-red-500 w-8 h-8 fill-current" />
-            </div>
-          </div>
-          <h2 className="text-3xl font-extrabold text-[#8B4513] mb-4 uppercase tracking-wide">Misión Pitufo</h2>
-          <p className="text-lg text-[#5d4037] leading-relaxed font-medium">
-            Únete a nosotros en la Aldea Pitufa para celebrar este cumpleaños doble. 
-            <br />
-            <span className="font-bold text-blue-600 flex items-center justify-center gap-2 mt-4 bg-blue-50 py-2 px-4 rounded-lg inline-block border border-blue-100">
-              <AlertTriangle size={20} className="text-orange-500"/> ¡Ten cuidado con Gargamel! 😼
-            </span>
-          </p>
-        </div>
-
-        {/* Dress Code Section */}
-        <div className="space-y-8 relative">
-           <MushroomIcon className="absolute -top-10 -left-6 w-16 h-16 hidden md:block z-0 opacity-80" />
-           
-          <div className="text-center relative z-10">
-            <h2 className="text-4xl font-black text-blue-600 flex items-center justify-center gap-3 drop-shadow-sm">
-              <Shirt className="text-white fill-blue-500 stroke-blue-700" size={40} /> 
-              Código de Vestimenta
-            </h2>
-            <div className="mt-4 flex flex-col items-center">
-              <p className="text-slate-600 font-bold text-lg bg-white/70 px-6 py-2 rounded-full border border-blue-200 shadow-sm mb-2 transform -rotate-1">
-                Informal y Divertido (¡Nada de gala!)
-              </p>
-              <p className="text-blue-800 font-extrabold text-xl">¡Elige tu personaje!</p>
-            </div>
-          </div>
-
-          <div className="grid md:grid-cols-3 gap-8 px-2">
-            {/* Card 1: Pitufo Clásico */}
-            <div className="bg-white rounded-3xl p-6 shadow-xl border-b-8 border-blue-500 hover:-translate-y-2 transition-transform duration-300">
-              <div className="w-24 h-24 mx-auto mb-4 flex items-center justify-center bg-blue-100 rounded-full border-4 border-blue-50">
-                 <ClassicSmurfIcon className="w-16 h-16" />
-              </div>
-              <h3 className="font-black text-xl mb-2 text-blue-600 text-center">Pitufo Clásico</h3>
-              <p className="text-sm text-slate-600 text-center font-bold mb-1 uppercase tracking-wide text-xs text-blue-400">Opción 1</p>
-              <p className="text-slate-700 text-center font-medium leading-tight">
-                Combina <strong>Azul y Blanco</strong>.
-              </p>
-            </div>
-
-            {/* Card 2: Papá Pitufo */}
-            <div className="bg-white rounded-3xl p-6 shadow-xl border-b-8 border-red-500 hover:-translate-y-2 transition-transform duration-300">
-              <div className="w-24 h-24 mx-auto mb-4 flex items-center justify-center bg-red-100 rounded-full border-4 border-red-50">
-                 <PapaSmurfIcon className="w-16 h-16" />
-              </div>
-              <h3 className="font-black text-xl mb-2 text-red-500 text-center">Papá Pitufo</h3>
-              <p className="text-sm text-slate-600 text-center font-bold mb-1 uppercase tracking-wide text-xs text-red-300">Opción 2</p>
-              <p className="text-slate-700 text-center font-medium leading-tight">
-                Combina <strong>Azul y Rojo</strong>.
-              </p>
-            </div>
-
-            {/* Card 3: Pitufina */}
-            <div className="bg-white rounded-3xl p-6 shadow-xl border-b-8 border-yellow-400 hover:-translate-y-2 transition-transform duration-300">
-               <div className="w-24 h-24 mx-auto mb-4 flex items-center justify-center bg-yellow-100 rounded-full border-4 border-yellow-50">
-                <SmurfetteIcon className="w-16 h-16" />
-              </div>
-              <h3 className="font-black text-xl mb-2 text-yellow-500 text-center">Pitufina</h3>
-              <p className="text-sm text-slate-600 text-center font-bold mb-1 uppercase tracking-wide text-xs text-yellow-300">Opción 3</p>
-              <p className="text-slate-700 text-center font-medium leading-tight">
-                Usa un <strong>Vestido Blanco o Azul</strong>.
-              </p>
-            </div>
-          </div>
-
-          {/* Fun Suggestion Footer */}
-          <div className="flex flex-col gap-4 mx-2 md:mx-auto max-w-2xl">
-            <div className="bg-blue-100 rounded-2xl p-4 border-2 border-blue-200 shadow-inner flex items-center justify-center gap-3 text-center">
-               <Smile className="text-blue-500 w-8 h-8 flex-shrink-0" />
-               <p className="text-blue-800 font-bold text-sm md:text-base">
-                 Sugerencia divertida: ¡Puedes venir con gorro, gorra o diadema <span className="text-slate-900 bg-white px-1 rounded">blanca</span> o <span className="text-white bg-red-500 px-1 rounded">roja</span> para complementar tu OUTFIT!
-               </p>
-            </div>
-
-            <div className="bg-yellow-100 rounded-2xl p-4 border-2 border-yellow-300 shadow-md flex items-center justify-center gap-3 text-center transform rotate-1 hover:rotate-0 transition-transform cursor-default">
-               <Gift className="text-orange-600 w-8 h-8 flex-shrink-0 animate-bounce" />
-               <p className="text-yellow-900 font-bold text-sm md:text-base">
-                 ¡ATENCIÓN! Habrá <span className="bg-yellow-300 px-2 py-0.5 rounded text-orange-800 border border-orange-200 shadow-sm mx-1">PREMIO SORPRESA 🏆</span> para el Pitufo o Pitufina mejor vestido. ¡A lucirse!
-               </p>
-            </div>
-          </div>
-        </div>
-
-        {/* Compact Location Section */}
-        <div className="max-w-2xl mx-auto relative group">
-            {/* Background blob for fun */}
-            <div className="absolute -inset-2 bg-gradient-to-r from-blue-200 to-purple-200 rounded-[2.5rem] rotate-1 opacity-50 blur-sm"></div>
-            
-            <div className="relative bg-white rounded-[2rem] p-6 shadow-xl border-4 border-blue-100 flex flex-col md:flex-row items-center text-center md:text-left gap-6 overflow-hidden">
-                {/* Decorative mushroom slightly visible */}
-                <MushroomIcon className="absolute -bottom-4 -right-4 w-20 h-20 opacity-10 rotate-12" />
-
-                <div className="bg-red-50 p-4 rounded-2xl border-2 border-red-100 transform rotate-3 flex-shrink-0">
-                   <MapPin className="w-8 h-8 text-red-500" />
-                </div>
-                
-                <div className="flex-1 z-10">
-                   <h3 className="text-xl font-black text-slate-800 mb-1">Ubicación de la Aldea</h3>
-                   <p className="text-slate-600 font-medium leading-snug">
-                       Calle Manabi 1-275 y Avenida 13 de Abril,<br/>
-                       <span className="text-blue-600 font-bold">Ibarra, Imbabura, Ecuador</span>
-                   </p>
-                </div>
-                
-                <div className="z-10 flex-shrink-0">
-                     <a 
-                       href="https://maps.app.goo.gl/JfwZodcFN6tJuPTAA" 
-                       target="_blank" 
-                       rel="noreferrer"
-                       className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-5 py-3 rounded-xl font-bold text-sm transition-all shadow-lg hover:shadow-blue-200/50 transform hover:-translate-y-1"
-                     >
-                       <span>Ver en Mapa</span>
-                       <MapPin size={16} />
-                     </a>
-                </div>
-            </div>
-        </div>
-
-        {/* RSVP Form */}
-        <div className="bg-white rounded-[2rem] p-8 md:p-12 shadow-2xl border-t-8 border-green-400 relative overflow-visible" id="rsvp">
-          {/* Decorative Leaf */}
-          <div className="absolute -top-6 left-1/2 transform -translate-x-1/2 bg-green-500 text-white px-6 py-2 rounded-full shadow-lg text-sm font-bold border-2 border-green-300">
-            RSVP
-          </div>
-
-          <div className="text-center mb-10 mt-4">
-            <h2 className="text-4xl font-black text-slate-800 mb-2">Confirma tu Asistencia</h2>
-            <p className="text-slate-500 font-medium">Ayúdanos a organizar las pitufifresas 🍓</p>
-          </div>
-
-          {submitted ? (
-            <div className="bg-green-50 border-2 border-green-200 rounded-2xl p-10 text-center animate-fade-in">
-              <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6 shadow-sm">
-                <Check className="text-green-600 w-10 h-10" />
-              </div>
-              <h3 className="text-3xl font-bold text-green-700 mb-3">¡Respuesta Enviada!</h3>
-              <p className="text-green-600 text-lg font-medium">
-                {formData.asistencia === 'si' ? "¡Gracias por confirmar! Nos vemos en la fiesta." : "¡Entendido! Te extrañaremos."}
-              </p>
-              <button 
-                onClick={() => setSubmitted(false)}
-                className="mt-8 text-sm text-green-600 font-semibold underline hover:text-green-800"
-              >
-                Enviar otra respuesta
-              </button>
-            </div>
-          ) : (
-            <form onSubmit={handleSubmit} className="space-y-6 max-w-lg mx-auto">
-              
-              {/* HONEYPOT FIELD - SEGURIDAD (Invisible para humanos) */}
-              <input 
-                type="text" 
-                name="_gotcha" 
-                value={formData._gotcha}
-                onChange={handleChange}
-                style={{ display: 'none' }}
-                tabIndex="-1" 
-                autoComplete="off"
-              />
-
-              <div>
-                <label className="block text-sm font-bold text-slate-700 mb-2 pl-2">Nombre y Apellido del Invitado</label>
-                <input 
-                  type="text" 
-                  name="nombre"
-                  required
-                  value={formData.nombre}
-                  onChange={handleChange}
-                  className="w-full px-5 py-4 rounded-2xl border-2 border-slate-200 focus:border-blue-400 focus:ring-4 focus:ring-blue-100 outline-none transition-all bg-slate-50 font-medium"
-                  placeholder="Ej. Pitufo Goloso Pérez"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-bold text-slate-700 mb-3 pl-2">¿Asistirás a la aldea?</label>
-                <div className="flex gap-4">
-                  <label className={`flex-1 cursor-pointer border-2 rounded-2xl p-4 flex flex-col items-center justify-center gap-2 transition-all ${formData.asistencia === 'si' ? 'border-blue-500 bg-blue-50 text-blue-700 shadow-md transform scale-105' : 'border-slate-200 text-slate-400 hover:bg-slate-50'}`}>
-                    <input 
-                      type="radio" 
-                      name="asistencia" 
-                      value="si" 
-                      checked={formData.asistencia === 'si'}
-                      onChange={handleChange}
-                      className="hidden"
-                    />
-                    <Check size={24} className={formData.asistencia === 'si' ? 'block' : 'hidden'} />
-                    <span className="font-bold">¡Sí, iré! 🍄</span>
-                  </label>
-                  <label className={`flex-1 cursor-pointer border-2 rounded-2xl p-4 flex flex-col items-center justify-center gap-2 transition-all ${formData.asistencia === 'no' ? 'border-red-400 bg-red-50 text-red-700 shadow-md transform scale-105' : 'border-slate-200 text-slate-400 hover:bg-slate-50'}`}>
-                    <input 
-                      type="radio" 
-                      name="asistencia" 
-                      value="no" 
-                      checked={formData.asistencia === 'no'}
-                      onChange={handleChange}
-                      className="hidden"
-                    />
-                    <span className="font-bold">No podré ir 😿</span>
-                  </label>
-                </div>
-              </div>
-
-              {formData.asistencia === 'si' && (
-                <div className="space-y-6 animate-in fade-in slide-in-from-top-4 duration-300">
-                  <div className="bg-blue-50 p-6 rounded-2xl border border-blue-100">
-                    <label className="block text-sm font-bold text-slate-700 mb-2">¿Llevas acompañantes?</label>
-                    <select 
-                      name="acompanantes"
-                      value={formData.acompanantes}
-                      onChange={handleAcompanantesCountChange}
-                      className="w-full px-4 py-3 rounded-xl border border-blue-200 focus:border-blue-500 outline-none bg-white font-medium mb-4"
-                    >
-                      <option value="0">Voy solo/a</option>
-                      <option value="1">1 Acompañante</option>
-                      <option value="2">2 Acompañantes</option>
-                      <option value="3">3 Acompañantes</option>
-                      <option value="4">4 Acompañantes</option>
-                      <option value="5">5 Acompañantes</option>
-                    </select>
-
-                    {parseInt(formData.acompanantes) > 0 && (
-                      <div className="space-y-4 animate-in fade-in">
-                        <label className="block text-sm font-bold text-slate-700 flex items-center gap-2">
-                          <Users size={16}/> Datos de los Acompañantes
-                        </label>
-                        
-                        {formData.listaAcompanantes.map((nombre, index) => (
-                           <div key={index} className="animate-in slide-in-from-left-2" style={{ animationDelay: `${index * 100}ms` }}>
-                              <input 
-                                type="text"
-                                value={nombre}
-                                onChange={(e) => handleCompanionNameChange(index, e.target.value)}
-                                className="w-full px-4 py-3 rounded-xl border border-blue-200 focus:border-blue-500 outline-none bg-white"
-                                placeholder={`Nombre y Apellido del Acompañante #${index + 1}`}
-                                required
-                              />
-                           </div>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                </div>
-              )}
-
-              {error && (
-                <div className="text-red-500 text-sm font-bold text-center bg-red-100 p-3 rounded-lg">
-                  {error}
-                </div>
-              )}
-
-              <button 
-                type="submit"
-                disabled={isSubmitting}
-                className="w-full bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 text-white font-black py-5 rounded-2xl shadow-xl hover:shadow-2xl transform hover:-translate-y-1 transition-all duration-200 text-lg border-b-4 border-blue-800 disabled:opacity-70 disabled:cursor-not-allowed"
-              >
-                {isSubmitting ? "ENVIANDO..." : "ENVIAR RESPUESTA"}
-              </button>
-            </form>
-          )}
-        </div>
-
-      </main>
-
-      <footer className="bg-[#1e293b] text-blue-200 py-16 text-center relative overflow-hidden">
-        <MushroomIcon className="absolute bottom-0 right-10 w-24 h-24 opacity-20 transform rotate-12" />
-        <MushroomIcon className="absolute bottom-0 left-10 w-16 h-16 opacity-20 transform -rotate-12" />
-        
-        <p className="text-lg font-medium mb-2">Hecho con 💙 para Lenin y Grace</p>
-        <p className="text-sm opacity-60">¡Nos vemos en la Aldea!</p>
-      </footer>
+    <!-- Elementos de fondo decorativos -->
+    <div class="fixed inset-0 pointer-events-none z-0 overflow-hidden">
+        <i data-lucide="cloud" class="absolute top-20 left-10 text-white/40 w-24 h-24 animate-pulse"></i>
+        <i data-lucide="cloud" class="absolute top-40 right-20 text-white/30 w-32 h-32 animate-pulse" style="animation-delay: 700ms;"></i>
+        <i data-lucide="cloud" class="absolute bottom-20 left-1/4 text-white/20 w-40 h-40"></i>
     </div>
-  );
-};
 
-export default App;
+    <!-- Hero Section -->
+    <header class="relative bg-gradient-to-b from-blue-600 to-sky-400 text-white pt-20 pb-48 px-4 text-center shadow-xl overflow-visible z-10">
+        <div class="relative z-10 max-w-5xl mx-auto">
+            <div class="inline-block bg-white/90 text-blue-700 px-6 py-2 rounded-full text-sm font-extrabold tracking-widest mb-6 shadow-lg transform -rotate-2 border-2 border-blue-200">
+                ★ CUMPLEAÑOS DOBLE ★
+            </div>
+            
+            <h1 class="text-5xl md:text-7xl font-extrabold mb-8 tracking-tight drop-shadow-[0_4px_4px_rgba(0,0,0,0.25)] text-white">
+                ¡Fiesta en la<br/>
+                <span class="text-yellow-300 drop-shadow-md">Aldea Pitufa!</span>
+            </h1>
+            
+            <!-- Tarjetas Padre e Hija -->
+            <div class="flex flex-col md:flex-row justify-center items-center gap-8 mt-12 mb-16 relative">
+                
+                <!-- Lenin's Card -->
+                <div class="bg-red-600/90 p-8 rounded-[2rem] border-4 border-red-400 shadow-2xl transform hover:scale-105 transition-transform relative z-10 w-full max-w-xs group">
+                    <div class="absolute -top-12 left-1/2 transform -translate-x-1/2 group-hover:-translate-y-2 transition-transform">
+                        <!-- SVG Papa Pitufo -->
+                        <svg viewBox="0 0 100 100" class="w-32 h-32 drop-shadow-2xl" filter="drop-shadow(0px 2px 2px rgba(0,0,0,0.1))">
+                            <path d="M20 45 Q 20 10 50 10 Q 80 10 80 45 L 90 55 Q 95 65 85 70 L 15 70 Q 5 65 10 55 Z" fill="#dc2626" />
+                            <circle cx="50" cy="65" r="25" fill="#3b82f6" />
+                            <path d="M28 75 Q 50 105 72 75 L 78 65 Q 90 85 75 95 Q 50 105 25 95 Q 10 85 22 65 Z" fill="white" />
+                            <ellipse cx="50" cy="65" rx="6" ry="4" fill="#60a5fa" />
+                        </svg>
+                    </div>
+                    <div class="mt-16 text-center">
+                        <h2 class="text-4xl font-black text-white mb-2 uppercase drop-shadow-md">Lenin</h2>
+                        <div class="bg-white text-red-600 font-bold text-xs tracking-wider px-4 py-1 rounded-full inline-block mb-3 border-2 border-red-200 shadow-sm">PAPÁ PITUFO</div>
+                        <p class="text-5xl font-extrabold text-yellow-300 drop-shadow-sm stroke-black">59</p>
+                        <p class="text-white font-medium text-sm opacity-90">AÑOS</p>
+                    </div>
+                </div>
+
+                <!-- Conector -->
+                <div class="flex flex-col items-center justify-center z-0 md:-mx-6 md:-mt-10 relative">
+                    <i data-lucide="heart" class="text-red-500 w-16 h-16 fill-current animate-pulse drop-shadow-lg"></i>
+                    <span class="font-black text-white bg-blue-700 px-6 py-2 rounded-full text-sm mt-2 border-4 border-blue-400 shadow-xl whitespace-nowrap transform -rotate-3">PADRE E HIJA</span>
+                </div>
+
+                <!-- Grace's Card -->
+                <div class="bg-yellow-400/90 p-8 rounded-[2rem] border-4 border-yellow-200 shadow-2xl transform hover:scale-105 transition-transform relative z-10 w-full max-w-xs group">
+                    <div class="absolute -top-12 left-1/2 transform -translate-x-1/2 group-hover:-translate-y-2 transition-transform">
+                        <!-- SVG Pitufina -->
+                        <svg viewBox="0 0 100 100" class="w-32 h-32 drop-shadow-2xl" filter="drop-shadow(0px 2px 2px rgba(0,0,0,0.1))">
+                            <path d="M15 55 Q 10 30 30 20 Q 50 5 70 20 Q 90 30 85 55 L 95 75 Q 100 90 80 95 L 20 95 Q 0 90 5 75 Z" fill="#facc15" />
+                            <path d="M30 35 Q 30 10 50 10 Q 70 10 70 35 L 82 45 Q 88 50 78 55 L 22 55 Q 12 50 18 45 Z" fill="white" />
+                            <circle cx="50" cy="65" r="22" fill="#3b82f6" />
+                            <ellipse cx="50" cy="65" rx="5" ry="3" fill="#60a5fa" />
+                            <path d="M34 58 Q 38 52 42 58" stroke="#1e40af" stroke-width="2" fill="none" stroke-linecap="round" />
+                            <path d="M58 58 Q 62 52 66 58" stroke="#1e40af" stroke-width="2" fill="none" stroke-linecap="round" />
+                        </svg>
+                    </div>
+                    <div class="mt-16 text-center">
+                        <h2 class="text-4xl font-black text-blue-900 mb-2 uppercase drop-shadow-sm">Grace</h2>
+                        <div class="bg-white text-blue-600 font-bold text-xs tracking-wider px-4 py-1 rounded-full inline-block mb-3 border-2 border-blue-200 shadow-sm">PITUFINA</div>
+                        <p class="text-5xl font-extrabold text-white drop-shadow-[0_2px_0_rgba(0,0,0,0.2)]">30</p>
+                        <p class="text-blue-900 font-medium text-sm opacity-80">AÑOS</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Datos Fecha y Hora -->
+            <div class="flex flex-col md:flex-row justify-center gap-4 text-sm md:text-base font-bold relative z-20">
+                <div class="bg-white/95 text-blue-700 px-8 py-4 rounded-2xl shadow-[0_8px_0_rgba(29,78,216,0.2)] transform hover:-translate-y-1 transition-all flex items-center justify-center gap-3 border-2 border-blue-100">
+                    <i data-lucide="calendar" class="text-red-500 w-6 h-6"></i>
+                    <span class="text-lg">27 de Diciembre</span>
+                </div>
+                <div class="bg-white/95 text-blue-700 px-8 py-4 rounded-2xl shadow-[0_8px_0_rgba(29,78,216,0.2)] transform hover:-translate-y-1 transition-all flex items-center justify-center gap-3 border-2 border-blue-100">
+                    <i data-lucide="clock" class="text-red-500 w-6 h-6"></i>
+                    <span class="text-lg">11:00 AM</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Grass Divider mejorado -->
+        <div class="absolute bottom-0 left-0 w-full z-10 pointer-events-none">
+            <svg class="w-full h-auto max-h-[100px] text-[#4ade80]" viewBox="0 0 1440 320" fill="currentColor" preserveAspectRatio="none">
+                <path fillOpacity="1" d="M0,96L48,112C96,128,192,160,288,160C384,160,480,128,576,112C672,96,768,96,864,112C960,128,1056,160,1152,160C1248,160,1344,128,1392,112L1440,96L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path>
+            </svg>
+        </div>
+
+        <!-- Setas decorativas flotantes -->
+        <!-- SVG Seta -->
+        <svg viewBox="0 0 100 100" class="absolute bottom-12 left-4 w-24 h-24 md:w-40 md:h-40 animate-float z-20 drop-shadow-xl">
+            <path d="M35 60 L 35 90 Q 35 95 40 95 L 60 95 Q 65 95 65 90 L 65 60 Z" fill="#FFFFFF" stroke="#e2e8f0" stroke-width="2" />
+            <path d="M10 60 Q 10 20 50 20 Q 90 20 90 60 Z" fill="#ef4444" />
+            <circle cx="30" cy="40" r="5" fill="white" opacity="0.9" />
+            <circle cx="70" cy="35" r="7" fill="white" opacity="0.9" />
+            <circle cx="50" cy="50" r="4" fill="white" opacity="0.9" />
+        </svg>
+        <svg viewBox="0 0 100 100" class="absolute bottom-8 right-6 w-20 h-20 md:w-32 md:h-32 animate-float-right z-20 drop-shadow-xl">
+            <path d="M35 60 L 35 90 Q 35 95 40 95 L 60 95 Q 65 95 65 90 L 65 60 Z" fill="#FFFFFF" stroke="#e2e8f0" stroke-width="2" />
+            <path d="M10 60 Q 10 20 50 20 Q 90 20 90 60 Z" fill="#ef4444" />
+            <circle cx="30" cy="40" r="5" fill="white" opacity="0.9" />
+            <circle cx="70" cy="35" r="7" fill="white" opacity="0.9" />
+            <circle cx="50" cy="50" r="4" fill="white" opacity="0.9" />
+        </svg>
+    </header>
+
+    <main class="max-w-4xl mx-auto relative z-20 px-4 pb-20 space-y-12 mt-12">
+        
+        <!-- Intro Card -->
+        <div class="relative bg-[#fdfbf7] rounded-xl p-8 shadow-2xl border-4 border-[#8B4513] text-center transform rotate-1 mx-4 md:mx-0">
+            <div class="absolute top-4 left-4 w-3 h-3 rounded-full bg-[#5d2e0c] shadow-inner"></div>
+            <div class="absolute top-4 right-4 w-3 h-3 rounded-full bg-[#5d2e0c] shadow-inner"></div>
+            <div class="absolute bottom-4 left-4 w-3 h-3 rounded-full bg-[#5d2e0c] shadow-inner"></div>
+            <div class="absolute bottom-4 right-4 w-3 h-3 rounded-full bg-[#5d2e0c] shadow-inner"></div>
+
+            <div class="flex justify-center mb-4">
+                <div class="bg-red-100 p-4 rounded-full border-2 border-red-200">
+                    <i data-lucide="heart" class="text-red-500 w-8 h-8 fill-current"></i>
+                </div>
+            </div>
+            <h2 class="text-3xl font-extrabold text-[#8B4513] mb-4 uppercase tracking-wide">Misión Pitufo</h2>
+            <p class="text-lg text-[#5d4037] leading-relaxed font-medium">
+                Únete a nosotros en la Aldea Pitufa para celebrar este cumpleaños doble. 
+                <br />
+                <span class="font-bold text-blue-600 flex items-center justify-center gap-2 mt-4 bg-blue-50 py-2 px-4 rounded-lg inline-block border border-blue-100">
+                    <i data-lucide="alert-triangle" class="text-orange-500 w-5 h-5"></i> ¡Ten cuidado con Gargamel! 😼
+                </span>
+            </p>
+        </div>
+
+        <!-- Dress Code Section -->
+        <div class="space-y-8 relative">
+            <svg viewBox="0 0 100 100" class="absolute -top-10 -left-6 w-16 h-16 hidden md:block z-0 opacity-80">
+                <path d="M35 60 L 35 90 Q 35 95 40 95 L 60 95 Q 65 95 65 90 L 65 60 Z" fill="#FFFFFF" stroke="#e2e8f0" stroke-width="2" />
+                <path d="M10 60 Q 10 20 50 20 Q 90 20 90 60 Z" fill="#ef4444" />
+            </svg>
+           
+            <div class="text-center relative z-10">
+                <h2 class="text-4xl font-black text-blue-600 flex items-center justify-center gap-3 drop-shadow-sm">
+                    <i data-lucide="shirt" class="text-white fill-blue-500 stroke-blue-700 w-10 h-10"></i>
+                    Código de Vestimenta
+                </h2>
+                <div class="mt-4 flex flex-col items-center">
+                    <p class="text-slate-600 font-bold text-lg bg-white/70 px-6 py-2 rounded-full border border-blue-200 shadow-sm mb-2 transform -rotate-1">
+                        Informal y Divertido (¡Nada de gala!)
+                    </p>
+                    <p class="text-blue-800 font-extrabold text-xl">¡Elige tu personaje!</p>
+                </div>
+            </div>
+
+            <div class="grid md:grid-cols-3 gap-8 px-2">
+                <!-- Card 1: Pitufo Clásico -->
+                <div class="bg-white rounded-3xl p-6 shadow-xl border-b-8 border-blue-500 hover:-translate-y-2 transition-transform duration-300">
+                    <div class="w-24 h-24 mx-auto mb-4 flex items-center justify-center bg-blue-100 rounded-full border-4 border-blue-50">
+                        <!-- SVG Pitufo Clasico -->
+                        <svg viewBox="0 0 100 100" class="w-16 h-16" filter="drop-shadow(0px 2px 2px rgba(0,0,0,0.1))">
+                            <path d="M20 45 Q 20 10 50 10 Q 80 10 80 45 L 90 55 Q 95 65 85 70 L 15 70 Q 5 65 10 55 Z" fill="#ffffff" />
+                            <circle cx="50" cy="65" r="25" fill="#3b82f6" />
+                            <ellipse cx="50" cy="65" rx="6" ry="4" fill="#60a5fa" />
+                            <path d="M40 75 Q 50 82 60 75" stroke="#1e3a8a" stroke-width="3" fill="none" stroke-linecap="round" />
+                        </svg>
+                    </div>
+                    <h3 class="font-black text-xl mb-2 text-blue-600 text-center">Pitufo Clásico</h3>
+                    <p class="text-sm text-slate-600 text-center font-bold mb-1 uppercase tracking-wide text-xs text-blue-400">Opción 1</p>
+                    <p class="text-slate-700 text-center font-medium leading-tight">Combina <strong>Azul y Blanco</strong>.</p>
+                </div>
+
+                <!-- Card 2: Papá Pitufo -->
+                <div class="bg-white rounded-3xl p-6 shadow-xl border-b-8 border-red-500 hover:-translate-y-2 transition-transform duration-300">
+                    <div class="w-24 h-24 mx-auto mb-4 flex items-center justify-center bg-red-100 rounded-full border-4 border-red-50">
+                        <!-- SVG Papa Pitufo -->
+                        <svg viewBox="0 0 100 100" class="w-16 h-16" filter="drop-shadow(0px 2px 2px rgba(0,0,0,0.1))">
+                            <path d="M20 45 Q 20 10 50 10 Q 80 10 80 45 L 90 55 Q 95 65 85 70 L 15 70 Q 5 65 10 55 Z" fill="#dc2626" />
+                            <circle cx="50" cy="65" r="25" fill="#3b82f6" />
+                            <path d="M28 75 Q 50 105 72 75 L 78 65 Q 90 85 75 95 Q 50 105 25 95 Q 10 85 22 65 Z" fill="white" />
+                            <ellipse cx="50" cy="65" rx="6" ry="4" fill="#60a5fa" />
+                        </svg>
+                    </div>
+                    <h3 class="font-black text-xl mb-2 text-red-500 text-center">Papá Pitufo</h3>
+                    <p class="text-sm text-slate-600 text-center font-bold mb-1 uppercase tracking-wide text-xs text-red-300">Opción 2</p>
+                    <p class="text-slate-700 text-center font-medium leading-tight">Combina <strong>Azul y Rojo</strong>.</p>
+                </div>
+
+                <!-- Card 3: Pitufina -->
+                <div class="bg-white rounded-3xl p-6 shadow-xl border-b-8 border-yellow-400 hover:-translate-y-2 transition-transform duration-300">
+                    <div class="w-24 h-24 mx-auto mb-4 flex items-center justify-center bg-yellow-100 rounded-full border-4 border-yellow-50">
+                        <!-- SVG Pitufina -->
+                        <svg viewBox="0 0 100 100" class="w-16 h-16" filter="drop-shadow(0px 2px 2px rgba(0,0,0,0.1))">
+                            <path d="M15 55 Q 10 30 30 20 Q 50 5 70 20 Q 90 30 85 55 L 95 75 Q 100 90 80 95 L 20 95 Q 0 90 5 75 Z" fill="#facc15" />
+                            <path d="M30 35 Q 30 10 50 10 Q 70 10 70 35 L 82 45 Q 88 50 78 55 L 22 55 Q 12 50 18 45 Z" fill="white" />
+                            <circle cx="50" cy="65" r="22" fill="#3b82f6" />
+                            <ellipse cx="50" cy="65" rx="5" ry="3" fill="#60a5fa" />
+                            <path d="M34 58 Q 38 52 42 58" stroke="#1e40af" stroke-width="2" fill="none" stroke-linecap="round" />
+                            <path d="M58 58 Q 62 52 66 58" stroke="#1e40af" stroke-width="2" fill="none" stroke-linecap="round" />
+                        </svg>
+                    </div>
+                    <h3 class="font-black text-xl mb-2 text-yellow-500 text-center">Pitufina</h3>
+                    <p class="text-sm text-slate-600 text-center font-bold mb-1 uppercase tracking-wide text-xs text-yellow-300">Opción 3</p>
+                    <p class="text-slate-700 text-center font-medium leading-tight">Usa un <strong>Vestido Blanco o Azul</strong>.</p>
+                </div>
+            </div>
+
+            <!-- Fun Suggestion Footer -->
+            <div class="flex flex-col gap-4 mx-2 md:mx-auto max-w-2xl">
+                <div class="bg-blue-100 rounded-2xl p-4 border-2 border-blue-200 shadow-inner flex items-center justify-center gap-3 text-center">
+                    <i data-lucide="smile" class="text-blue-500 w-8 h-8 flex-shrink-0"></i>
+                    <p class="text-blue-800 font-bold text-sm md:text-base">
+                        Sugerencia divertida: ¡Puedes venir con gorro, gorra o diadema <span class="text-slate-900 bg-white px-1 rounded">blanca</span> o <span class="text-white bg-red-500 px-1 rounded">roja</span> para complementar tu OUTFIT!
+                    </p>
+                </div>
+
+                <div class="bg-yellow-100 rounded-2xl p-4 border-2 border-yellow-300 shadow-md flex items-center justify-center gap-3 text-center transform rotate-1 hover:rotate-0 transition-transform cursor-default">
+                    <i data-lucide="gift" class="text-orange-600 w-8 h-8 flex-shrink-0 animate-bounce"></i>
+                    <p class="text-yellow-900 font-bold text-sm md:text-base">
+                        ¡ATENCIÓN! Habrá <span class="bg-yellow-300 px-2 py-0.5 rounded text-orange-800 border border-orange-200 shadow-sm mx-1">PREMIO SORPRESA 🏆</span> para el Pitufo o Pitufina mejor vestido. ¡A lucirse!
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Compact Location Section -->
+        <div class="max-w-2xl mx-auto relative group">
+            <div class="absolute -inset-2 bg-gradient-to-r from-blue-200 to-purple-200 rounded-[2.5rem] rotate-1 opacity-50 blur-sm"></div>
+            
+            <div class="relative bg-white rounded-[2rem] p-6 shadow-xl border-4 border-blue-100 flex flex-col md:flex-row items-center text-center md:text-left gap-6 overflow-hidden">
+                <!-- Seta fondo decorativa -->
+                <svg viewBox="0 0 100 100" class="absolute -bottom-4 -right-4 w-20 h-20 opacity-10 rotate-12">
+                    <path d="M35 60 L 35 90 Q 35 95 40 95 L 60 95 Q 65 95 65 90 L 65 60 Z" fill="#FFFFFF" stroke="#e2e8f0" stroke-width="2" />
+                    <path d="M10 60 Q 10 20 50 20 Q 90 20 90 60 Z" fill="#ef4444" />
+                </svg>
+
+                <div class="bg-red-50 p-4 rounded-2xl border-2 border-red-100 transform rotate-3 flex-shrink-0">
+                    <i data-lucide="map-pin" class="w-8 h-8 text-red-500"></i>
+                </div>
+                
+                <div class="flex-1 z-10">
+                    <h3 class="text-xl font-black text-slate-800 mb-1">Ubicación de la Aldea</h3>
+                    <p class="text-slate-600 font-medium leading-snug">
+                        Calle Manabi 1-275 y Avenida 13 de Abril,<br/>
+                        <span class="text-blue-600 font-bold">Ibarra, Imbabura, Ecuador</span>
+                    </p>
+                </div>
+                
+                <div class="z-10 flex-shrink-0">
+                    <a href="https://maps.app.goo.gl/JfwZodcFN6tJuPTAA" target="_blank" rel="noreferrer"
+                       class="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-5 py-3 rounded-xl font-bold text-sm transition-all shadow-lg hover:shadow-blue-200/50 transform hover:-translate-y-1">
+                        <span>Ver en Mapa</span>
+                        <i data-lucide="map-pin" class="w-4 h-4"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- RSVP Form -->
+        <div class="bg-white rounded-[2rem] p-8 md:p-12 shadow-2xl border-t-8 border-green-400 relative overflow-visible mb-8" id="rsvp">
+            <!-- Hoja Decorativa -->
+            <div class="absolute -top-6 left-1/2 transform -translate-x-1/2 bg-green-500 text-white px-6 py-2 rounded-full shadow-lg text-sm font-bold border-2 border-green-300">
+                RSVP
+            </div>
+
+            <div class="text-center mb-10 mt-4">
+                <h2 class="text-4xl font-black text-slate-800 mb-2">Confirma tu Asistencia</h2>
+                <p class="text-slate-500 font-medium">Ayúdanos a organizar las pitufifresas 🍓</p>
+            </div>
+
+            <!-- Mensaje de Éxito (Oculto por defecto) -->
+            <div id="success-message" class="hidden bg-green-50 border-2 border-green-200 rounded-2xl p-10 text-center animate-fade-in">
+                <div class="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6 shadow-sm">
+                    <i data-lucide="check" class="text-green-600 w-10 h-10"></i>
+                </div>
+                <h3 class="text-3xl font-bold text-green-700 mb-3">¡Respuesta Enviada!</h3>
+                <p id="success-text" class="text-green-600 text-lg font-medium"></p>
+                <button onclick="resetForm()" class="mt-8 text-sm text-green-600 font-semibold underline hover:text-green-800">
+                    Enviar otra respuesta
+                </button>
+            </div>
+
+            <!-- Formulario -->
+            <form id="rsvp-form" class="space-y-6 max-w-lg mx-auto">
+                <!-- Honeypot (Seguridad) -->
+                <input type="text" name="_gotcha" style="display:none" tabindex="-1" autocomplete="off">
+
+                <div>
+                    <label class="block text-sm font-bold text-slate-700 mb-2 pl-2">Nombre y Apellido del Invitado</label>
+                    <input type="text" name="nombre" required
+                        class="w-full px-5 py-4 rounded-2xl border-2 border-slate-200 focus:border-blue-400 focus:ring-4 focus:ring-blue-100 outline-none transition-all bg-slate-50 font-medium"
+                        placeholder="Ej. Pitufo Goloso Pérez">
+                </div>
+
+                <div>
+                    <label class="block text-sm font-bold text-slate-700 mb-3 pl-2">¿Asistirás a la aldea?</label>
+                    <div class="flex gap-4">
+                        <label id="label-si" class="flex-1 cursor-pointer border-2 rounded-2xl p-4 flex flex-col items-center justify-center gap-2 transition-all border-blue-500 bg-blue-50 text-blue-700 shadow-md transform scale-105">
+                            <input type="radio" name="asistencia" value="si" checked class="hidden" onchange="handleAsistenciaChange(this.value)">
+                            <i data-lucide="check" class="w-6 h-6 block"></i>
+                            <span class="font-bold">¡Sí, iré! 🍄</span>
+                        </label>
+                        <label id="label-no" class="flex-1 cursor-pointer border-2 rounded-2xl p-4 flex flex-col items-center justify-center gap-2 transition-all border-slate-200 text-slate-400 hover:bg-slate-50">
+                            <input type="radio" name="asistencia" value="no" class="hidden" onchange="handleAsistenciaChange(this.value)">
+                            <span class="font-bold">No podré ir 😿</span>
+                        </label>
+                    </div>
+                </div>
+
+                <div id="acompanantes-section" class="space-y-6 animate-in fade-in slide-in-from-top-4 duration-300">
+                    <div class="bg-blue-50 p-6 rounded-2xl border border-blue-100">
+                        <label class="block text-sm font-bold text-slate-700 mb-2">¿Llevas acompañantes?</label>
+                        <select id="acompanantes-select" class="w-full px-4 py-3 rounded-xl border border-blue-200 focus:border-blue-500 outline-none bg-white font-medium mb-4" onchange="generateCompanionInputs(this.value)">
+                            <option value="0">Voy solo/a</option>
+                            <option value="1">1 Acompañante</option>
+                            <option value="2">2 Acompañantes</option>
+                            <option value="3">3 Acompañantes</option>
+                            <option value="4">4 Acompañantes</option>
+                            <option value="5">5 Acompañantes</option>
+                        </select>
+
+                        <div id="companions-container" class="space-y-4 hidden">
+                            <label class="block text-sm font-bold text-slate-700 flex items-center gap-2">
+                                <i data-lucide="users" class="w-4 h-4"></i> Datos de los Acompañantes
+                            </label>
+                            <!-- Los inputs se generarán aquí -->
+                        </div>
+                    </div>
+                </div>
+
+                <div id="error-message" class="hidden text-red-500 text-sm font-bold text-center bg-red-100 p-3 rounded-lg"></div>
+
+                <button type="submit" id="submit-btn" class="w-full bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 text-white font-black py-5 rounded-2xl shadow-xl hover:shadow-2xl transform hover:-translate-y-1 transition-all duration-200 text-lg border-b-4 border-blue-800 disabled:opacity-70 disabled:cursor-not-allowed">
+                    ENVIAR RESPUESTA
+                </button>
+            </form>
+        </div>
+
+    </main>
+
+    <footer class="bg-[#1e293b] text-blue-200 py-16 text-center relative overflow-hidden mt-auto">
+        <!-- Seta footer izquierda -->
+        <svg viewBox="0 0 100 100" class="absolute bottom-0 left-10 w-16 h-16 opacity-20 transform -rotate-12">
+            <path d="M35 60 L 35 90 Q 35 95 40 95 L 60 95 Q 65 95 65 90 L 65 60 Z" fill="#FFFFFF" stroke="#e2e8f0" stroke-width="2" />
+            <path d="M10 60 Q 10 20 50 20 Q 90 20 90 60 Z" fill="#ef4444" />
+        </svg>
+        <!-- Seta footer derecha -->
+        <svg viewBox="0 0 100 100" class="absolute bottom-0 right-10 w-24 h-24 opacity-20 transform rotate-12">
+            <path d="M35 60 L 35 90 Q 35 95 40 95 L 60 95 Q 65 95 65 90 L 65 60 Z" fill="#FFFFFF" stroke="#e2e8f0" stroke-width="2" />
+            <path d="M10 60 Q 10 20 50 20 Q 90 20 90 60 Z" fill="#ef4444" />
+        </svg>
+        
+        <p class="text-lg font-medium mb-2">Hecho con 💙 para Lenin y Grace</p>
+        <p class="text-sm opacity-60">¡Nos vemos en la Aldea!</p>
+    </footer>
+
+    <script>
+        // Inicializar Iconos
+        lucide.createIcons();
+
+        // Constantes
+        const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyfqBf1kBPDdt6Z7OjKeYZLOz5EhxpIlLtDAGTuJRzB2st8rZR9FyVkN5oHYKnMjynEvA/exec";
+
+        // Manejar cambio de asistencia (Si/No)
+        function handleAsistenciaChange(value) {
+            const section = document.getElementById('acompanantes-section');
+            const labelSi = document.getElementById('label-si');
+            const labelNo = document.getElementById('label-no');
+            const iconCheck = labelSi.querySelector('svg'); // Lucide genera SVG
+
+            if (value === 'si') {
+                section.classList.remove('hidden');
+                // Estilos Activos SI
+                labelSi.className = "flex-1 cursor-pointer border-2 rounded-2xl p-4 flex flex-col items-center justify-center gap-2 transition-all border-blue-500 bg-blue-50 text-blue-700 shadow-md transform scale-105";
+                if(iconCheck) iconCheck.style.display = 'block';
+                
+                // Estilos Inactivos NO
+                labelNo.className = "flex-1 cursor-pointer border-2 rounded-2xl p-4 flex flex-col items-center justify-center gap-2 transition-all border-slate-200 text-slate-400 hover:bg-slate-50";
+            } else {
+                section.classList.add('hidden');
+                // Estilos Inactivos SI
+                labelSi.className = "flex-1 cursor-pointer border-2 rounded-2xl p-4 flex flex-col items-center justify-center gap-2 transition-all border-slate-200 text-slate-400 hover:bg-slate-50";
+                if(iconCheck) iconCheck.style.display = 'none';
+
+                // Estilos Activos NO
+                labelNo.className = "flex-1 cursor-pointer border-2 rounded-2xl p-4 flex flex-col items-center justify-center gap-2 transition-all border-red-400 bg-red-50 text-red-700 shadow-md transform scale-105";
+            }
+        }
+
+        // Generar inputs para acompañantes
+        function generateCompanionInputs(count) {
+            const container = document.getElementById('companions-container');
+            const num = parseInt(count);
+            
+            if (num > 0) {
+                container.classList.remove('hidden');
+                // Guardar valores actuales si existen para no borrarlos
+                const existingInputs = container.querySelectorAll('input');
+                const currentValues = Array.from(existingInputs).map(input => input.value);
+
+                container.innerHTML = `
+                    <label class="block text-sm font-bold text-slate-700 flex items-center gap-2 mb-2">
+                        <i data-lucide="users" class="w-4 h-4"></i> Datos de los Acompañantes
+                    </label>
+                `;
+
+                for (let i = 0; i < num; i++) {
+                    const val = currentValues[i] || '';
+                    const div = document.createElement('div');
+                    div.className = "mb-3 animate-fade-in";
+                    div.innerHTML = `
+                        <input type="text" name="acompanante_${i}" value="${val}" required
+                            class="w-full px-4 py-3 rounded-xl border border-blue-200 focus:border-blue-500 outline-none bg-white"
+                            placeholder="Nombre y Apellido del Acompañante #${i + 1}">
+                    `;
+                    container.appendChild(div);
+                }
+                lucide.createIcons(); // Refrescar icono insertado
+            } else {
+                container.classList.add('hidden');
+                container.innerHTML = '';
+            }
+        }
+
+        // Resetear formulario
+        function resetForm() {
+            document.getElementById('rsvp-form').reset();
+            document.getElementById('rsvp-form').classList.remove('hidden');
+            document.getElementById('success-message').classList.add('hidden');
+            handleAsistenciaChange('si'); // Volver al estado por defecto
+            generateCompanionInputs(0);
+        }
+
+        // Manejar envío del formulario
+        document.getElementById('rsvp-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(this);
+            const honeypot = formData.get('_gotcha');
+            const submitBtn = document.getElementById('submit-btn');
+            const errorMsg = document.getElementById('error-message');
+
+            // Protección Anti-Bot
+            if (honeypot) {
+                console.log("Bot detectado 🤖");
+                // Simular éxito falso
+                this.classList.add('hidden');
+                document.getElementById('success-message').classList.remove('hidden');
+                return;
+            }
+
+            // UI Loading
+            submitBtn.disabled = true;
+            submitBtn.textContent = "ENVIANDO...";
+            errorMsg.classList.add('hidden');
+
+            // Recopilar datos
+            const asistencia = document.querySelector('input[name="asistencia"]:checked').value;
+            const nombrePrincipal = formData.get('nombre');
+            let listaAcompanantes = [];
+
+            if (asistencia === 'si') {
+                const inputs = document.querySelectorAll('#companions-container input');
+                inputs.forEach(input => {
+                    if(input.value.trim()) listaAcompanantes.push(input.value.trim());
+                });
+            }
+
+            const dataToSubmit = {
+                nombrePrincipal: nombrePrincipal,
+                asistencia: asistencia,
+                listaAcompanantes: listaAcompanantes
+            };
+
+            // Enviar a Google Script
+            fetch(GOOGLE_SCRIPT_URL, {
+                method: "POST",
+                mode: "no-cors",
+                headers: { "Content-Type": "text/plain" },
+                body: JSON.stringify(dataToSubmit)
+            })
+            .then(() => {
+                // Éxito (con no-cors asumimos éxito si no falla la red)
+                this.classList.add('hidden');
+                const successDiv = document.getElementById('success-message');
+                const successText = document.getElementById('success-text');
+                
+                successText.textContent = asistencia === 'si' 
+                    ? "¡Gracias por confirmar! Nos vemos en la fiesta." 
+                    : "¡Entendido! Te extrañaremos.";
+                
+                successDiv.classList.remove('hidden');
+                submitBtn.disabled = false;
+                submitBtn.textContent = "ENVIAR RESPUESTA";
+            })
+            .catch(error => {
+                console.error("Error:", error);
+                errorMsg.textContent = "Hubo un problema al enviar. Por favor intenta de nuevo.";
+                errorMsg.classList.remove('hidden');
+                submitBtn.disabled = false;
+                submitBtn.textContent = "ENVIAR RESPUESTA";
+            });
+        });
+    </script>
+</body>
+</html>
